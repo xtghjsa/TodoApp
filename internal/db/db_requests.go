@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Add task into database
+// AddTaskDb Add task into database
 func (db *DbConn) AddTaskDb(title, description, date, userID string) error {
 	parsedDate, err := time.Parse("20060102", date)
 	parsedDateStr := parsedDate.Format("20060102")
@@ -21,7 +21,7 @@ func (db *DbConn) AddTaskDb(title, description, date, userID string) error {
 	return nil
 }
 
-// Delete task from database
+// DelTaskDb Delete task from database
 func (db *DbConn) DelTaskDb(id int, userID string) error {
 	_, err := db.DB.Exec("DELETE FROM tasks WHERE id = $1 AND user_id = $2", id, userID)
 	if err != nil {
@@ -30,7 +30,7 @@ func (db *DbConn) DelTaskDb(id int, userID string) error {
 	return nil
 }
 
-// Update task in database
+// UpdTaskDb Update task in database
 func (db *DbConn) UpdTaskDb(title, description, date, userID string, id int) error {
 	parsedDate, err := time.Parse("20060102", date)
 	parsedDateStr := parsedDate.Format("20060102")
@@ -46,7 +46,7 @@ func (db *DbConn) UpdTaskDb(title, description, date, userID string, id int) err
 
 }
 
-// Mark task as done
+// MarkTaskDoneDb Mark task as done
 func (db *DbConn) MarkTaskDoneDb(id int, userID string) error {
 	status := "done"
 	_, err := db.DB.Exec("UPDATE tasks SET status = $1 WHERE id = $2 AND user_id = $3",
@@ -57,7 +57,7 @@ func (db *DbConn) MarkTaskDoneDb(id int, userID string) error {
 	return nil
 }
 
-// Get tasks from db
+// ShowTasksDb Get tasks from db
 func (db *DbConn) ShowTasksDb(query, queryKey, userID string) (types.ShowTasks, error) {
 	var taskResponse types.ShowTasks
 	var rows *sql.Rows
@@ -98,7 +98,7 @@ func (db *DbConn) ShowTasksDb(query, queryKey, userID string) (types.ShowTasks, 
 	return taskResponse, err
 }
 
-// Authorization
+// RegUserDb Add new user to database
 func (db *DbConn) RegUserDb(username, hashedPassword string) error {
 	_, err := db.DB.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", username, hashedPassword)
 	if err != nil {
@@ -107,6 +107,7 @@ func (db *DbConn) RegUserDb(username, hashedPassword string) error {
 	return nil
 }
 
+// CheckUser Check if user registered
 func (db *DbConn) CheckUser(username string) (userID int, storedHashedPass string, err error) {
 	var userIdFound int
 	var storedPassFound string

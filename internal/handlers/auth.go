@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	t "main/internal/types"
@@ -25,7 +26,7 @@ type LoginStruct struct {
 	Redis RedisConn
 }
 
-// POST
+// RegUser register new user
 func (h *Handler) RegUser(c *gin.Context) {
 	var login t.LoginData
 
@@ -57,7 +58,7 @@ func (ls *LoginStruct) Login(c *gin.Context) {
 
 	userID, storedHashedPass, err := ls.Db.CheckUser(login.Username)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid login data"})
 			return
 		}
@@ -99,7 +100,7 @@ func AuthMw(rc RedisConn) gin.HandlerFunc {
 			return
 		}
 		userID, err := rc.Connect.Get(*rc.Ctx, token).Result()
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "token is invalid"})
 			c.Abort()
 			return

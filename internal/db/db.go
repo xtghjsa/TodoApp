@@ -11,7 +11,7 @@ type DbConn struct {
 }
 
 func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, error) {
-	//Check if
+	// Check if env variables are not set
 	if PgsUser == "" || PgsPass == "" || PgsDbName == "" || PgsHost == "" || PgsPort == "" {
 		return nil, fmt.Errorf("lacking database environment variables, check .env file")
 
@@ -58,7 +58,7 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 	if err != nil {
 		return nil, fmt.Errorf("error pinging PostgreSQL server: %v", err)
 	}
-	//Creating `tasks` table if not exists
+	// Creating `tasks` table if not exists
 
 	createTasksTable := `
 	CREATE TABLE IF NOT EXISTS tasks (
@@ -74,7 +74,7 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 		return nil, fmt.Errorf("error creating `tasks` table: %v", err)
 	}
 
-	//Creating `users` table if not exists
+	// Creating `users` table if not exists
 	createUsersTable := `
 	CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,

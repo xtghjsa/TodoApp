@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("failed to load environment variables from .env file: %v", err)
 	}
 
-	//PostgreSQL env variables
+	//Postgres env variables
 	pgsUser := os.Getenv("POSTGRES_USER")
 	pgsPass := os.Getenv("POSTGRES_PASSWORD")
 	pgsDbName := os.Getenv("POSTGRES_DBNAME")
@@ -51,13 +51,13 @@ func main() {
 		Ctx:     &ctx,
 	}
 	log.Println("Connected to Redis")
-	//Connect to PostgreSQL database
+	//Connect to Postgres database
 	Conn, err := db.StartDb(pgsUser, pgsPass, pgsDbName, pgsHost, pgsPort)
 	if err != nil {
 		log.Fatalf("failed to start database: %v\n", err)
 	}
 	defer Conn.DB.Close()
-	//PostgreSQL connection struct
+	//Postgres connection struct
 	dbHandler := h.Handler{DbConn: *Conn}
 
 	//Login Struct
