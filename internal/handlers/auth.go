@@ -49,6 +49,7 @@ func (h *Handler) RegUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "created"})
 }
 
+// Login
 func (ls *LoginStruct) Login(c *gin.Context) {
 	var login t.LoginData
 	if err := c.ShouldBindJSON(&login); err != nil {
@@ -82,9 +83,9 @@ func (ls *LoginStruct) Login(c *gin.Context) {
 	}
 	log.Printf("Created session token for user: %s, token: %s\n", login.Username, sessionToken)
 	c.JSON(http.StatusOK, gin.H{"token": sessionToken})
-
 }
 
+// AuthMw middleware authentification
 func AuthMw(rc RedisConn) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.GetHeader("Authorization")

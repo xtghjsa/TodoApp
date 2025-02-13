@@ -35,6 +35,7 @@ func main() {
 	//Redis env variables
 	redisHost := os.Getenv("REDIS_HOST")
 	redisPort := os.Getenv("REDIS_PORT")
+
 	//Start Redis
 	ctx := context.Background()
 	rds := redis.NewClient(&redis.Options{
@@ -51,6 +52,7 @@ func main() {
 		Ctx:     &ctx,
 	}
 	log.Println("Connected to Redis")
+
 	//Connect to Postgres database
 	Conn, err := db.StartDb(pgsUser, pgsPass, pgsDbName, pgsHost, pgsPort)
 	if err != nil {
@@ -67,7 +69,7 @@ func main() {
 	}
 
 	r := gin.Default()
-	//Server routs
+
 	r.POST("/reg", dbHandler.RegUser)
 	r.POST("/login", loginHandler.Login)
 
@@ -80,7 +82,7 @@ func main() {
 		needAuth.DELETE("/delete", dbHandler.DelTask)
 		needAuth.GET("/show", dbHandler.ShowTasks)
 	}
-	//Start server
+	//Run server
 	if err := r.Run(serverHost + ":" + serverPort); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}

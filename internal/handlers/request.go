@@ -29,13 +29,13 @@ func (h *Handler) AddTask(c *gin.Context) {
 		return
 	}
 	userIDStr := userID.(string)
+
 	err := h.AddTaskDb(addTask.Title, addTask.Description, addTask.Date, userIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "can't add task"})
 		log.Panicf("error adding task: %v\n", err)
 		return
 	}
-
 	c.JSON(http.StatusCreated, gin.H{"task": "added"})
 }
 
@@ -51,12 +51,14 @@ func (h *Handler) DelTask(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "wrong user"})
 		return
 	}
+	userIDStr := userID.(string)
+
 	taskID, err := strconv.Atoi(delTask.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong id format"})
 		return
 	}
-	userIDStr := userID.(string)
+
 	err = h.DelTaskDb(taskID, userIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't delete task"})
@@ -73,17 +75,20 @@ func (h *Handler) UpdTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task udpate data"})
 		return
 	}
+
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "wrong user"})
 		return
 	}
+	userIDStr := userID.(string)
+
 	taskId, err := strconv.Atoi(updTask.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong id format"})
 		return
 	}
-	userIDStr := userID.(string)
+
 	err = h.UpdTaskDb(updTask.Title, updTask.Description, updTask.Date, userIDStr, taskId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't update task"})
@@ -100,17 +105,20 @@ func (h *Handler) MarkTaskDone(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid task id"})
 		return
 	}
+
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "wrong user"})
 		return
 	}
+
 	taskId, err := strconv.Atoi(taskDone.Id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong id format"})
 		return
 	}
 	userIDStr := userID.(string)
+
 	err = h.MarkTaskDoneDb(taskId, userIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't mark task done"})
@@ -142,8 +150,8 @@ func (h *Handler) ShowTasks(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "wrong user"})
 		return
 	}
-
 	userIDStr := userID.(string)
+
 	taskResponse, err := h.ShowTasksDb(query, queryKey, userIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't show tasks"})

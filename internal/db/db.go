@@ -16,6 +16,7 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 		return nil, fmt.Errorf("lacking database environment variables, check .env file")
 
 	}
+
 	// Connecting to postgres server
 	serverConnection := fmt.Sprintf("user=%s password=%s host=%s port=%s sslmode=disable",
 		PgsUser, PgsPass, PgsHost, PgsPort)
@@ -30,6 +31,7 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 		return nil, fmt.Errorf("error pinging PostgreSQL server: %v", err)
 	}
 	log.Println("Successfully connected to PostgreSQL server")
+
 	//Check if database exists, if no - creating database
 	var exists bool
 	err = pgsServer.QueryRow("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname=$1)", PgsDbName).Scan(&exists)
@@ -58,8 +60,8 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 	if err != nil {
 		return nil, fmt.Errorf("error pinging PostgreSQL server: %v", err)
 	}
-	// Creating `tasks` table if not exists
 
+	// Creating `tasks` table if not exists
 	createTasksTable := `
 	CREATE TABLE IF NOT EXISTS tasks (
 		id SERIAL PRIMARY KEY,
@@ -73,17 +75,25 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 	if err != nil {
 		return nil, fmt.Errorf("error creating `tasks` table: %v", err)
 	}
+	_, err = pgsDb.Exec("CREATE INDEX IF NOT EXISTS user_id_index ON tasks (user_id)")
+	if err != nil {
+		return nil, fmt.Errorf("error creating index on `tasks` table: %v", err)
+	}
 
 	// Creating `users` table if not exists
 	createUsersTable := `
 	CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
-		username VARCHAR(32) UNIQUE NOT NULL,
+		username VARCHAR(32) NOT NULL,
 		password VARCHAR(128) NOT NULL
 	);`
 	_, err = pgsDb.Exec(createUsersTable)
 	if err != nil {
 		return nil, fmt.Errorf("error creating `users` table: %v", err)
+	}
+	_, err = pgsDb.Exec("CREATE UNIQUE INDEX IF NOT EXISTS username_index ON users (username)")
+	if err != nil {
+		return nil, fmt.Errorf("error creating index on `users` table: %v", err)
 	}
 
 	log.Println("Successfully connected to PostgreSQL database")
