@@ -1,4 +1,4 @@
-package db
+package pkg
 
 import (
 	"database/sql"
@@ -6,11 +6,7 @@ import (
 	"log"
 )
 
-type DbConn struct {
-	DB *sql.DB
-}
-
-func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, error) {
+func InitializeDatabase(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*sql.DB, error) {
 	// Check if env variables are not set
 	if PgsUser == "" || PgsPass == "" || PgsDbName == "" || PgsHost == "" || PgsPort == "" {
 		return nil, fmt.Errorf("lacking database environment variables, check .env file")
@@ -95,7 +91,5 @@ func StartDb(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*DbConn, err
 	if err != nil {
 		return nil, fmt.Errorf("error creating index on `users` table: %v", err)
 	}
-
-	log.Println("Successfully connected to PostgreSQL database")
-	return &DbConn{DB: pgsDb}, nil
+	return pgsDb, nil
 }
