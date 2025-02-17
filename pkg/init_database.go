@@ -61,7 +61,7 @@ func InitializeDatabase(PgsUser, PgsPass, PgsDbName, PgsHost, PgsPort string) (*
 	createTasksTable := `
 	CREATE TABLE IF NOT EXISTS tasks (
 		id SERIAL PRIMARY KEY,
-		title VARCHAR(255) NOT NULL,
+		title VARCHAR(255) NOT NULL DEFAULT 'Untitled',
 		description TEXT,
 		date VARCHAR(8),
 		status VARCHAR(16) NOT NULL DEFAULT 'notDone',

@@ -2,9 +2,10 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 	"main/internal/api/request"
 	"main/internal/api/response"
-	"time"
+	"main/internal/utils"
 )
 
 type AddTaskInterface interface {
@@ -13,14 +14,15 @@ type AddTaskInterface interface {
 
 // AddTask Add task into database
 func (db *PostgresRepository) AddTask(task request.AddTask, userID any) error {
-	parsedDate, err := time.Parse("20060102", task.Date)
-	parsedDateStr := parsedDate.Format("20060102")
+	parsedDate, err := utils.ParseDate(task.Date)
 	if err != nil {
+		log.Printf("wrong date format: %v\n", err)
 		return err
 	}
 	_, err = db.DB.Exec("INSERT INTO tasks (title, description, date, user_id) VALUES ($1, $2, $3, $4)",
-		task.Title, task.Description, parsedDateStr, userID)
+		task.Title, task.Description, parsedDate, userID)
 	if err != nil {
+		log.Printf("can't add task: %v\n", err)
 		return err
 	}
 	return nil
@@ -34,6 +36,7 @@ type DeleteTaskInterface interface {
 func (db *PostgresRepository) DeleteTask(delete request.DeleteTaskID, userID any) error {
 	_, err := db.DB.Exec("DELETE FROM tasks WHERE id = $1 AND user_id = $2", delete.ID, userID)
 	if err != nil {
+		log.Printf("can't delete task: %v\n", err)
 		return err
 	}
 	return nil
@@ -49,6 +52,7 @@ func (db *PostgresRepository) MarkTaskDone(done request.MarkTaskDoneID, userID a
 	_, err := db.DB.Exec("UPDATE tasks SET status = $1 WHERE id = $2 AND user_id = $3",
 		status, done.ID, userID)
 	if err != nil {
+		log.Printf("can't mark task as done: %v\n", err)
 		return nil
 	}
 	return nil
@@ -60,14 +64,15 @@ type UpdateTaskInterface interface {
 
 // UpdateTask Update task in database
 func (db *PostgresRepository) UpdateTask(task request.UpdateTask, userID any) error {
-	parsedDate, err := time.Parse("20060102", task.Date)
-	parsedDateStr := parsedDate.Format("20060102")
+	parsedDate, err := utils.ParseDate(task.Date)
 	if err != nil {
+		log.Printf("wrong date format: %v\n", err)
 		return err
 	}
 	_, err = db.DB.Exec("UPDATE tasks SET title = $1, description = $2, date = $3 WHERE id = $4 AND user_id = $5",
-		task.Title, task.Description, parsedDateStr, task.ID, userID)
+		task.Title, task.Description, parsedDate, task.ID, userID)
 	if err != nil {
+		log.Printf("can't update task: %v\n", err)
 		return err
 	}
 	return nil
@@ -85,12 +90,12 @@ func (db *PostgresRepository) ShowTasks(query, queryKey string, userID any) (res
 	var err error
 	switch queryKey {
 	case "date":
-		parsedDate, err := time.Parse("20060102", query)
-		parsedDateStr := parsedDate.Format("20060102")
+		parsedDate, err := utils.ParseDate(query)
 		if err != nil {
+			log.Printf("wrong date format: %v\n", err)
 			return taskResponse, err
 		}
-		rows, err = db.DB.Query("SELECT id, title, description, date, status FROM tasks WHERE user_id = $1 AND date = $2", userID, parsedDateStr)
+		rows, err = db.DB.Query("SELECT id, title, description, date, status FROM tasks WHERE user_id = $1 AND date = $2", userID, parsedDate)
 		if err != nil {
 			return taskResponse, err
 		}
